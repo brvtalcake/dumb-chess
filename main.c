@@ -125,25 +125,13 @@ typedef struct app_s
     {
         char source_path[512];
         SDL_Surface* surface;
-        struct
-        {
-            int x;
-            int y;
-            int is_dead;
-        } pos;
-    } white_pieces[6];
+    } white_pieces_surfaces[6];
 
     struct
     {
         char source_path[512];
         SDL_Surface* surface;
-        struct
-        {
-            int x;
-            int y;
-            int is_dead;
-        } pos;
-    } black_pieces[6];
+    } black_pieces_surfaces[6];
 
     struct 
     {
@@ -187,6 +175,13 @@ typedef struct app_s
         double h;
     } board;
 
+    struct
+    {
+        int x;
+        int y;
+        int is_dead;
+    } pieces[2][16];
+
     struct 
     {
         SDL_Window *window;
@@ -220,6 +215,175 @@ typedef struct app_s
     int freed;
 
 } app_t;
+
+void set_pieces_init_pos(app_t* app)
+{
+    if (!app || app->freed)
+    {
+        return;
+    }
+
+    // Set pawns
+    for (size_t i = 0; i < 8; ++i)
+    {
+        app->pieces[WHITE][i].x = i;
+        if (app->pov == WHITE_POV)
+        {
+            app->pieces[WHITE][i].y = 6;
+        }
+        else
+        {
+            app->pieces[WHITE][i].y = 1;
+        }
+        app->pieces[WHITE][i].is_dead = 0;
+        app->pieces[BLACK][i].x = i;
+        if (app->pov == WHITE_POV)
+        {
+            app->pieces[BLACK][i].y = 1;
+        }
+        else
+        {
+            app->pieces[BLACK][i].y = 6;
+        }
+        app->pieces[BLACK][i].is_dead = 0;
+    }
+
+    // Set knights
+    if (app->pov == WHITE_POV)
+    {
+        app->pieces[WHITE][8].x = 1;
+        app->pieces[WHITE][8].y = 7;
+        app->pieces[WHITE][8].is_dead = 0;
+        app->pieces[WHITE][9].x = 6;
+        app->pieces[WHITE][9].y = 7;
+        app->pieces[WHITE][9].is_dead = 0;
+        app->pieces[BLACK][8].x = 1;
+        app->pieces[BLACK][8].y = 0;
+        app->pieces[BLACK][8].is_dead = 0;
+        app->pieces[BLACK][9].x = 6;
+        app->pieces[BLACK][9].y = 0;
+        app->pieces[BLACK][9].is_dead = 0;
+    }
+    else
+    {
+        app->pieces[WHITE][8].x = 1;
+        app->pieces[WHITE][8].y = 0;
+        app->pieces[WHITE][8].is_dead = 0;
+        app->pieces[WHITE][9].x = 6;
+        app->pieces[WHITE][9].y = 0;
+        app->pieces[WHITE][9].is_dead = 0;
+        app->pieces[BLACK][8].x = 1;
+        app->pieces[BLACK][8].y = 7;
+        app->pieces[BLACK][8].is_dead = 0;
+        app->pieces[BLACK][9].x = 6;
+        app->pieces[BLACK][9].y = 7;
+        app->pieces[BLACK][9].is_dead = 0;
+    }
+
+    // Set bishops
+    if (app->pov == WHITE_POV)
+    {
+        app->pieces[WHITE][10].x = 2;
+        app->pieces[WHITE][10].y = 7;
+        app->pieces[WHITE][10].is_dead = 0;
+        app->pieces[WHITE][11].x = 5;
+        app->pieces[WHITE][11].y = 7;
+        app->pieces[WHITE][11].is_dead = 0;
+        app->pieces[BLACK][10].x = 2;
+        app->pieces[BLACK][10].y = 0;
+        app->pieces[BLACK][10].is_dead = 0;
+        app->pieces[BLACK][11].x = 5;
+        app->pieces[BLACK][11].y = 0;
+        app->pieces[BLACK][11].is_dead = 0;
+    }
+    else
+    {
+        app->pieces[WHITE][10].x = 2;
+        app->pieces[WHITE][10].y = 0;
+        app->pieces[WHITE][10].is_dead = 0;
+        app->pieces[WHITE][11].x = 5;
+        app->pieces[WHITE][11].y = 0;
+        app->pieces[WHITE][11].is_dead = 0;
+        app->pieces[BLACK][10].x = 2;
+        app->pieces[BLACK][10].y = 7;
+        app->pieces[BLACK][10].is_dead = 0;
+        app->pieces[BLACK][11].x = 5;
+        app->pieces[BLACK][11].y = 7;
+        app->pieces[BLACK][11].is_dead = 0;
+    }
+
+    // Set rooks
+    if (app->pov == WHITE_POV)
+    {
+        app->pieces[WHITE][12].x = 0;
+        app->pieces[WHITE][12].y = 7;
+        app->pieces[WHITE][12].is_dead = 0;
+        app->pieces[WHITE][13].x = 7;
+        app->pieces[WHITE][13].y = 7;
+        app->pieces[WHITE][13].is_dead = 0;
+        app->pieces[BLACK][12].x = 0;
+        app->pieces[BLACK][12].y = 0;
+        app->pieces[BLACK][12].is_dead = 0;
+        app->pieces[BLACK][13].x = 7;
+        app->pieces[BLACK][13].y = 0;
+        app->pieces[BLACK][13].is_dead = 0;
+    }
+    else
+    {
+        app->pieces[WHITE][12].x = 0;
+        app->pieces[WHITE][12].y = 0;
+        app->pieces[WHITE][12].is_dead = 0;
+        app->pieces[WHITE][13].x = 7;
+        app->pieces[WHITE][13].y = 0;
+        app->pieces[WHITE][13].is_dead = 0;
+        app->pieces[BLACK][12].x = 0;
+        app->pieces[BLACK][12].y = 7;
+        app->pieces[BLACK][12].is_dead = 0;
+        app->pieces[BLACK][13].x = 7;
+        app->pieces[BLACK][13].y = 7;
+        app->pieces[BLACK][13].is_dead = 0;
+    }
+
+    // Set queens
+    if (app->pov == WHITE_POV)
+    {
+        app->pieces[WHITE][14].x = 3;
+        app->pieces[WHITE][14].y = 7;
+        app->pieces[WHITE][14].is_dead = 0;
+        app->pieces[BLACK][14].x = 3;
+        app->pieces[BLACK][14].y = 0;
+        app->pieces[BLACK][14].is_dead = 0;
+    }
+    else
+    {
+        app->pieces[WHITE][14].x = 3;
+        app->pieces[WHITE][14].y = 0;
+        app->pieces[WHITE][14].is_dead = 0;
+        app->pieces[BLACK][14].x = 3;
+        app->pieces[BLACK][14].y = 7;
+        app->pieces[BLACK][14].is_dead = 0;
+    }
+
+    // Set kings
+    if (app->pov == WHITE_POV)
+    {
+        app->pieces[WHITE][15].x = 4;
+        app->pieces[WHITE][15].y = 7;
+        app->pieces[WHITE][15].is_dead = 0;
+        app->pieces[BLACK][15].x = 4;
+        app->pieces[BLACK][15].y = 0;
+        app->pieces[BLACK][15].is_dead = 0;
+    }
+    else
+    {
+        app->pieces[WHITE][15].x = 4;
+        app->pieces[WHITE][15].y = 0;
+        app->pieces[WHITE][15].is_dead = 0;
+        app->pieces[BLACK][15].x = 4;
+        app->pieces[BLACK][15].y = 7;
+        app->pieces[BLACK][15].is_dead = 0;
+    }
+}
 
 app_t* init_game(app_t* app)
 {
@@ -290,38 +454,36 @@ app_t* init_game(app_t* app)
     app->pov = WHITE_POV;
     for (size_t i = 0; i < 6; ++i)
     {
-        memset(app->white_pieces[i].source_path, 0, 512);
-        memset(app->black_pieces[i].source_path, 0, 512);
-        app->black_pieces[i].pos.is_dead = 0;
-        app->white_pieces[i].pos.is_dead = 0;
+        memset(app->white_pieces_surfaces[i].source_path, 0, 512);
+        memset(app->black_pieces_surfaces[i].source_path, 0, 512);
     }
-    strcpy(app->white_pieces[0].source_path, W_PAWN_IMG);
-    strcpy(app->white_pieces[1].source_path, W_KNIGHT_IMG);
-    strcpy(app->white_pieces[2].source_path, W_BISHOP_IMG);
-    strcpy(app->white_pieces[3].source_path, W_ROOK_IMG);
-    strcpy(app->white_pieces[4].source_path, W_QUEEN_IMG);
-    strcpy(app->white_pieces[5].source_path, W_KING_IMG);
-    strcpy(app->black_pieces[0].source_path, B_PAWN_IMG);
-    strcpy(app->black_pieces[1].source_path, B_KNIGHT_IMG);
-    strcpy(app->black_pieces[2].source_path, B_BISHOP_IMG);
-    strcpy(app->black_pieces[3].source_path, B_ROOK_IMG);
-    strcpy(app->black_pieces[4].source_path, B_QUEEN_IMG);
-    strcpy(app->black_pieces[5].source_path, B_KING_IMG);
+    strcpy(app->white_pieces_surfaces[0].source_path, W_PAWN_IMG);
+    strcpy(app->white_pieces_surfaces[1].source_path, W_KNIGHT_IMG);
+    strcpy(app->white_pieces_surfaces[2].source_path, W_BISHOP_IMG);
+    strcpy(app->white_pieces_surfaces[3].source_path, W_ROOK_IMG);
+    strcpy(app->white_pieces_surfaces[4].source_path, W_QUEEN_IMG);
+    strcpy(app->white_pieces_surfaces[5].source_path, W_KING_IMG);
+    strcpy(app->black_pieces_surfaces[0].source_path, B_PAWN_IMG);
+    strcpy(app->black_pieces_surfaces[1].source_path, B_KNIGHT_IMG);
+    strcpy(app->black_pieces_surfaces[2].source_path, B_BISHOP_IMG);
+    strcpy(app->black_pieces_surfaces[3].source_path, B_ROOK_IMG);
+    strcpy(app->black_pieces_surfaces[4].source_path, B_QUEEN_IMG);
+    strcpy(app->black_pieces_surfaces[5].source_path, B_KING_IMG);
     for (size_t i = 0; i < 6; ++i)
     {
-        app->white_pieces[i].surface = NULL;
-        app->black_pieces[i].surface = NULL;
+        app->white_pieces_surfaces[i].surface = NULL;
+        app->black_pieces_surfaces[i].surface = NULL;
     }
     for (size_t i = 0; i < 6; ++i)
     {
-        app->white_pieces[i].surface = IMG_Load(app->white_pieces[i].source_path);
-        if (!app->white_pieces[i].surface)
+        app->white_pieces_surfaces[i].surface = IMG_Load(app->white_pieces_surfaces[i].source_path);
+        if (!app->white_pieces_surfaces[i].surface)
         {
             fprintf(stderr, "Failed to load image: %s\n", IMG_GetError());
             return NULL;
         }
-        app->black_pieces[i].surface = IMG_Load(app->black_pieces[i].source_path);
-        if (!app->black_pieces[i].surface)
+        app->black_pieces_surfaces[i].surface = IMG_Load(app->black_pieces_surfaces[i].source_path);
+        if (!app->black_pieces_surfaces[i].surface)
         {
             fprintf(stderr, "Failed to load image: %s\n", IMG_GetError());
             return NULL;
@@ -333,7 +495,7 @@ app_t* init_game(app_t* app)
     app->states.selected_piece = NONE_SELECTED;
     app->states.game_state = GAME_NOT_STARTED;
 
-    // TODO: Pieces positions
+    set_pieces_init_pos(app);
     
     return app;
 }
@@ -409,8 +571,8 @@ void quit_game(app_t* app)
     SDL_DestroyWindow(app->resources.window);
     for (size_t i = 0; i < 6; ++i)
     {
-        SDL_FreeSurface(app->white_pieces[i].surface);
-        SDL_FreeSurface(app->black_pieces[i].surface);
+        SDL_FreeSurface(app->white_pieces_surfaces[i].surface);
+        SDL_FreeSurface(app->black_pieces_surfaces[i].surface);
     }
     TTF_CloseFont(app->font.ptr);
     TTF_Quit();
@@ -433,6 +595,216 @@ SDL_Rect* screen_dim(app_t* app, SDL_Rect* rect)
     app->screen.w = rect->w;
     app->screen.h = rect->h;
     return rect;
+}
+
+int draw_pieces(app_t* app, double min_dim, double max_dim, double x_offset, double y_offset)
+{
+    if (app->freed)
+    {
+        return -1;
+    }
+    SDL_Rect rect = {0};
+    rect.w = (int) ((min_dim - (min_dim / 8)) / 8);
+    rect.h = (int) ((min_dim - (min_dim / 8)) / 8);
+    for (size_t i = 0; i < 16; ++i)
+    {
+        if (app->pieces[WHITE][i].is_dead)
+        {
+            continue;
+        }
+        rect.x = (int) (x_offset + (app->pieces[WHITE][i].x * rect.w));
+        rect.y = (int) (y_offset + (app->pieces[WHITE][i].y * rect.h));
+        if (i <= 7)
+        {
+            SDL_Texture* texture = SDL_CreateTextureFromSurface(app->resources.renderer, app->white_pieces_surfaces[PAWN].surface);
+            if (!texture)
+            {
+                fprintf(stderr, "Failed to create texture from surface: %s\n", SDL_GetError());
+                return -1;
+            }
+            if (SDL_RenderCopy(app->resources.renderer, texture, NULL, &rect))
+            {
+                fprintf(stderr, "Failed to render copy: %s\n", SDL_GetError());
+                SDL_DestroyTexture(texture);
+                return -1;
+            }
+        }
+        else if (i <= 9)
+        {
+            SDL_Texture* texture = SDL_CreateTextureFromSurface(app->resources.renderer, app->white_pieces_surfaces[KNIGHT].surface);
+            if (!texture)
+            {
+                fprintf(stderr, "Failed to create texture from surface: %s\n", SDL_GetError());
+                return -1;
+            }
+            if (SDL_RenderCopy(app->resources.renderer, texture, NULL, &rect))
+            {
+                fprintf(stderr, "Failed to render copy: %s\n", SDL_GetError());
+                SDL_DestroyTexture(texture);
+                return -1;
+            }
+        }
+        else if (i <= 11)
+        {
+            SDL_Texture* texture = SDL_CreateTextureFromSurface(app->resources.renderer, app->white_pieces_surfaces[BISHOP].surface);
+            if (!texture)
+            {
+                fprintf(stderr, "Failed to create texture from surface: %s\n", SDL_GetError());
+                return -1;
+            }
+            if (SDL_RenderCopy(app->resources.renderer, texture, NULL, &rect))
+            {
+                fprintf(stderr, "Failed to render copy: %s\n", SDL_GetError());
+                SDL_DestroyTexture(texture);
+                return -1;
+            }
+        }
+        else if (i <= 13)
+        {
+            SDL_Texture* texture = SDL_CreateTextureFromSurface(app->resources.renderer, app->white_pieces_surfaces[ROOK].surface);
+            if (!texture)
+            {
+                fprintf(stderr, "Failed to create texture from surface: %s\n", SDL_GetError());
+                return -1;
+            }
+            if (SDL_RenderCopy(app->resources.renderer, texture, NULL, &rect))
+            {
+                fprintf(stderr, "Failed to render copy: %s\n", SDL_GetError());
+                SDL_DestroyTexture(texture);
+                return -1;
+            }
+        }
+        else if (i <= 14)
+        {
+            SDL_Texture* texture = SDL_CreateTextureFromSurface(app->resources.renderer, app->white_pieces_surfaces[QUEEN].surface);
+            if (!texture)
+            {
+                fprintf(stderr, "Failed to create texture from surface: %s\n", SDL_GetError());
+                return -1;
+            }
+            if (SDL_RenderCopy(app->resources.renderer, texture, NULL, &rect))
+            {
+                fprintf(stderr, "Failed to render copy: %s\n", SDL_GetError());
+                SDL_DestroyTexture(texture);
+                return -1;
+            }
+        }
+        else
+        {
+            SDL_Texture* texture = SDL_CreateTextureFromSurface(app->resources.renderer, app->white_pieces_surfaces[KING].surface);
+            if (!texture)
+            {
+                fprintf(stderr, "Failed to create texture from surface: %s\n", SDL_GetError());
+                return -1;
+            }
+            if (SDL_RenderCopy(app->resources.renderer, texture, NULL, &rect))
+            {
+                fprintf(stderr, "Failed to render copy: %s\n", SDL_GetError());
+                SDL_DestroyTexture(texture);
+                return -1;
+            }
+        }
+    }
+    for (size_t i = 0; i < 16; ++i)
+    {
+        if (app->pieces[BLACK][i].is_dead)
+        {
+            continue;
+        }
+        rect.x = (int) (x_offset + (app->pieces[BLACK][i].x * rect.w));
+        rect.y = (int) (y_offset + (app->pieces[BLACK][i].y * rect.h));
+        if (i <= 7)
+        {
+            SDL_Texture* texture = SDL_CreateTextureFromSurface(app->resources.renderer, app->black_pieces_surfaces[PAWN].surface);
+            if (!texture)
+            {
+                fprintf(stderr, "Failed to create texture from surface: %s\n", SDL_GetError());
+                return -1;
+            }
+            if (SDL_RenderCopy(app->resources.renderer, texture, NULL, &rect))
+            {
+                fprintf(stderr, "Failed to render copy: %s\n", SDL_GetError());
+                SDL_DestroyTexture(texture);
+                return -1;
+            }
+        }
+        else if (i <= 9)
+        {
+            SDL_Texture* texture = SDL_CreateTextureFromSurface(app->resources.renderer, app->black_pieces_surfaces[KNIGHT].surface);
+            if (!texture)
+            {
+                fprintf(stderr, "Failed to create texture from surface: %s\n", SDL_GetError());
+                return -1;
+            }
+            if (SDL_RenderCopy(app->resources.renderer, texture, NULL, &rect))
+            {
+                fprintf(stderr, "Failed to render copy: %s\n", SDL_GetError());
+                SDL_DestroyTexture(texture);
+                return -1;
+            }
+        }
+        else if (i <= 11)
+        {
+            SDL_Texture* texture = SDL_CreateTextureFromSurface(app->resources.renderer, app->black_pieces_surfaces[BISHOP].surface);
+            if (!texture)
+            {
+                fprintf(stderr, "Failed to create texture from surface: %s\n", SDL_GetError());
+                return -1;
+            }
+            if (SDL_RenderCopy(app->resources.renderer, texture, NULL, &rect))
+            {
+                fprintf(stderr, "Failed to render copy: %s\n", SDL_GetError());
+                SDL_DestroyTexture(texture);
+                return -1;
+            }
+        }
+        else if (i <= 13)
+        {
+            SDL_Texture* texture = SDL_CreateTextureFromSurface(app->resources.renderer, app->black_pieces_surfaces[ROOK].surface);
+            if (!texture)
+            {
+                fprintf(stderr, "Failed to create texture from surface: %s\n", SDL_GetError());
+                return -1;
+            }
+            if (SDL_RenderCopy(app->resources.renderer, texture, NULL, &rect))
+            {
+                fprintf(stderr, "Failed to render copy: %s\n", SDL_GetError());
+                SDL_DestroyTexture(texture);
+                return -1;
+            }
+        }
+        else if (i <= 14)
+        {
+            SDL_Texture* texture = SDL_CreateTextureFromSurface(app->resources.renderer, app->black_pieces_surfaces[QUEEN].surface);
+            if (!texture)
+            {
+                fprintf(stderr, "Failed to create texture from surface: %s\n", SDL_GetError());
+                return -1;
+            }
+            if (SDL_RenderCopy(app->resources.renderer, texture, NULL, &rect))
+            {
+                fprintf(stderr, "Failed to render copy: %s\n", SDL_GetError());
+                SDL_DestroyTexture(texture);
+                return -1;
+            }
+        }
+        else
+        {
+            SDL_Texture* texture = SDL_CreateTextureFromSurface(app->resources.renderer, app->black_pieces_surfaces[KING].surface);
+            if (!texture)
+            {
+                fprintf(stderr, "Failed to create texture from surface: %s\n", SDL_GetError());
+                return -1;
+            }
+            if (SDL_RenderCopy(app->resources.renderer, texture, NULL, &rect))
+            {
+                fprintf(stderr, "Failed to render copy: %s\n", SDL_GetError());
+                SDL_DestroyTexture(texture);
+                return -1;
+            }
+        }
+    }
+    return 0;
 }
 
 int draw_chess_board(app_t* app)
@@ -534,13 +906,18 @@ int draw_chess_board(app_t* app)
         }
     }
 
+    if (draw_pieces(app, min_dim, max_dim, x_offset, y_offset))
+    {
+        return -1;
+    }
+
     // Test: try to render a queen
-    SDL_Rect queen_rect = {0};
+    /* SDL_Rect queen_rect = {0};
     queen_rect.w = (int) ((double) rect.w * 0.8);
     queen_rect.h = (int) ((double) rect.h * 0.8);
     queen_rect.x = (int) (x_offset + (3 * (double) rect.w) + ((double) rect.w * 0.1));
     queen_rect.y = (int) (y_offset + (3 * (double) rect.h) + ((double) rect.h * 0.1));
-    SDL_Texture* queen_texture = SDL_CreateTextureFromSurface(app->resources.renderer, app->white_pieces[QUEEN].surface);
+    SDL_Texture* queen_texture = SDL_CreateTextureFromSurface(app->resources.renderer, app->white_pieces_surfaces[QUEEN].surface);
     if (!queen_texture)
     {
         fprintf(stderr, "Failed to create texture from surface: %s\n", SDL_GetError());
@@ -551,8 +928,8 @@ int draw_chess_board(app_t* app)
         fprintf(stderr, "Failed to render copy: %s\n", SDL_GetError());
         return -1;
     }
-    SDL_DestroyTexture(queen_texture);
-    
+    SDL_DestroyTexture(queen_texture); */
+
     return 0;
 }
 
