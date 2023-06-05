@@ -1,8 +1,52 @@
+// Define _GNU_SOURCE to get the definitions of the *_t types.
+#if !defined(_GNU_SOURCE)
+    #define _GNU_SOURCE
+#endif
+
+#define NO_SVG
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_image.h>
 
+#if defined(_WIN32) || defined(_WIN64)
+    #include <windows.h>
+#elif defined(__linux__)
+    #include <sys/time.h>
+    #include <sys/types.h>
+    #include <unistd.h>
+#else
+    #error "Unsupported platform"
+#endif
+
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include <time.h>
+
+#if defined(INIT_PIECE)
+    #undef INIT_PIECE
+#endif
+#define INIT_PIECE(color, num, _x, _y)                      \
+{                                                           \
+    app->pieces[color][num].normal_pos.x = _x;              \
+    app->pieces[color][num].normal_pos.y = _y;              \
+    app->pieces[color][num].is_dead = 0;                    \
+    app->pieces[color][num].is_selected = 0;                \
+    app->pieces[color][num].rect = (SDL_Rect) {0, 0, 0, 0}; \
+}
+
+
+#if defined(FPS) || defined(FPMS) || defined(EXPECTED_FRAME_TIME)
+    #undef FPS
+    #undef FPMS
+    #undef EXPECTED_FRAME_TIME
+#endif
+#define FPS 90.0
+#define FPMS (FPS / 1000.0)
+// in milliseconds
+#define EXPECTED_FRAME_TIME (1.0 / FPMS)
 
 #if defined(PAWN) || defined(KNIGHT) || defined(BISHOP) || defined(ROOK) || defined(QUEEN) || defined(KING)
     #undef PAWN
@@ -43,7 +87,11 @@
 #if defined(PIECES_IMG_PATH)
     #undef PIECES_IMG_PATH
 #endif
-#define PIECES_IMG_PATH "./JohnPablok Cburnett Chess set/SVG with shadow/"
+#if defined(NO_SVG)
+    #define PIECES_IMG_PATH "./JohnPablok Cburnett Chess set/PNGs/With Shadow/256px/"
+#else
+    #define PIECES_IMG_PATH "./JohnPablok Cburnett Chess set/SVG No shadow/"
+#endif
 
 #if defined(B_PAWN_IMG) || defined(B_KNIGHT_IMG) || defined(B_BISHOP_IMG) || defined(B_ROOK_IMG) || defined(B_QUEEN_IMG) || defined(B_KING_IMG)
     #undef B_PAWN_IMG
@@ -53,12 +101,21 @@
     #undef B_QUEEN_IMG
     #undef B_KING_IMG
 #endif
-#define B_PAWN_IMG PIECES_IMG_PATH "b_pawn_svg_withShadow.svg"
-#define B_KNIGHT_IMG PIECES_IMG_PATH "b_knight_svg_withShadow.svg"
-#define B_BISHOP_IMG PIECES_IMG_PATH "b_bishop_svg_withShadow.svg" 
-#define B_ROOK_IMG PIECES_IMG_PATH "b_rook_svg_withShadow.svg"
-#define B_QUEEN_IMG PIECES_IMG_PATH "b_queen_svg_withShadow.svg"
-#define B_KING_IMG PIECES_IMG_PATH "b_king_svg_withShadow.svg"
+#if defined(NO_SVG)
+    #define B_PAWN_IMG PIECES_IMG_PATH "b_pawn_png_shadow_256px.png"
+    #define B_KNIGHT_IMG PIECES_IMG_PATH "b_knight_png_shadow_256px.png"
+    #define B_BISHOP_IMG PIECES_IMG_PATH "b_bishop_png_shadow_256px.png"
+    #define B_ROOK_IMG PIECES_IMG_PATH "b_rook_png_shadow_256px.png"
+    #define B_QUEEN_IMG PIECES_IMG_PATH "b_queen_png_shadow_256px.png"
+    #define B_KING_IMG PIECES_IMG_PATH "b_king_png_shadow_256px.png"
+#else
+    #define B_PAWN_IMG PIECES_IMG_PATH "b_pawn_svg_NoShadow.svg"
+    #define B_KNIGHT_IMG PIECES_IMG_PATH "b_knight_svg_NoShadow.svg"
+    #define B_BISHOP_IMG PIECES_IMG_PATH "b_bishop_svg_NoShadow.svg"
+    #define B_ROOK_IMG PIECES_IMG_PATH "b_rook_svg_NoShadow.svg"
+    #define B_QUEEN_IMG PIECES_IMG_PATH "b_queen_svg_NoShadow.svg"
+    #define B_KING_IMG PIECES_IMG_PATH "b_king_svg_NoShadow.svg"
+#endif
 
 #if defined(W_PAWN_IMG) || defined(W_KNIGHT_IMG) || defined(W_BISHOP_IMG) || defined(W_ROOK_IMG) || defined(W_QUEEN_IMG) || defined(W_KING_IMG)
     #undef W_PAWN_IMG
@@ -68,12 +125,21 @@
     #undef W_QUEEN_IMG
     #undef W_KING_IMG
 #endif
-#define W_PAWN_IMG PIECES_IMG_PATH "w_pawn_svg_withShadow.svg"
-#define W_KNIGHT_IMG PIECES_IMG_PATH "w_knight_svg_withShadow.svg"
-#define W_BISHOP_IMG PIECES_IMG_PATH "w_bishop_svg_withShadow.svg"
-#define W_ROOK_IMG PIECES_IMG_PATH "w_rook_svg_withShadow.svg"
-#define W_QUEEN_IMG PIECES_IMG_PATH "w_queen_svg_withShadow.svg"
-#define W_KING_IMG PIECES_IMG_PATH "w_king_svg_withShadow.svg"
+#if defined(NO_SVG)
+    #define W_PAWN_IMG PIECES_IMG_PATH "w_pawn_png_shadow_256px.png"
+    #define W_KNIGHT_IMG PIECES_IMG_PATH "w_knight_png_shadow_256px.png"
+    #define W_BISHOP_IMG PIECES_IMG_PATH "w_bishop_png_shadow_256px.png"
+    #define W_ROOK_IMG PIECES_IMG_PATH "w_rook_png_shadow_256px.png"
+    #define W_QUEEN_IMG PIECES_IMG_PATH "w_queen_png_shadow_256px.png"
+    #define W_KING_IMG PIECES_IMG_PATH "w_king_png_shadow_256px.png"
+#else
+    #define W_PAWN_IMG PIECES_IMG_PATH "w_pawn_svg_NoShadow.svg"
+    #define W_KNIGHT_IMG PIECES_IMG_PATH "w_knight_svg_NoShadow.svg"
+    #define W_BISHOP_IMG PIECES_IMG_PATH "w_bishop_svg_NoShadow.svg"
+    #define W_ROOK_IMG PIECES_IMG_PATH "w_rook_svg_NoShadow.svg"
+    #define W_QUEEN_IMG PIECES_IMG_PATH "w_queen_svg_NoShadow.svg"
+    #define W_KING_IMG PIECES_IMG_PATH "w_king_svg_NoShadow.svg"
+#endif
 
 #if defined(HACK_FONT_PATH)
     #undef HACK_FONT_PATH
@@ -149,17 +215,6 @@ typedef struct app_s
 
         enum
         {
-            NONE_SELECTED,
-            PAWN_SELECTED,
-            KNIGHT_SELECTED,
-            BISHOP_SELECTED,
-            ROOK_SELECTED,
-            QUEEN_SELECTED,
-            KING_SELECTED
-        } selected_piece;
-
-        enum
-        {
             GAME_OVER,
             GAME_STARTED,
             GAME_PAUSED,
@@ -177,9 +232,25 @@ typedef struct app_s
 
     struct
     {
-        int x;
-        int y;
+        union
+        {
+            // position on the board when not selected
+            struct
+            {
+                int x;
+                int y;
+            } normal_pos; 
+
+            // position on the screen when selected
+            struct
+            {
+                double x;
+                double y;
+            } selected_pos; 
+        };
+        SDL_Rect rect;
         int is_dead;
+        int is_selected;
     } pieces[2][16];
 
     struct 
@@ -226,162 +297,125 @@ void set_pieces_init_pos(app_t* app)
     // Set pawns
     for (size_t i = 0; i < 8; ++i)
     {
-        app->pieces[WHITE][i].x = i;
+        app->pieces[WHITE][i].normal_pos.x = i;
         if (app->pov == WHITE_POV)
         {
-            app->pieces[WHITE][i].y = 6;
+            app->pieces[WHITE][i].normal_pos.y = 6;
         }
         else
         {
-            app->pieces[WHITE][i].y = 1;
+            app->pieces[WHITE][i].normal_pos.y = 1;
         }
         app->pieces[WHITE][i].is_dead = 0;
-        app->pieces[BLACK][i].x = i;
+        app->pieces[WHITE][i].is_selected = 0;
+        app->pieces[WHITE][i].rect = (SDL_Rect) {0, 0, 0, 0};
+
+        app->pieces[BLACK][i].normal_pos.x = i;
         if (app->pov == WHITE_POV)
         {
-            app->pieces[BLACK][i].y = 1;
+            app->pieces[BLACK][i].normal_pos.y = 1;
         }
         else
         {
-            app->pieces[BLACK][i].y = 6;
+            app->pieces[BLACK][i].normal_pos.y = 6;
         }
         app->pieces[BLACK][i].is_dead = 0;
+        app->pieces[BLACK][i].is_selected = 0;
+        app->pieces[BLACK][i].rect = (SDL_Rect) {0, 0, 0, 0};
     }
 
     // Set knights
     if (app->pov == WHITE_POV)
     {
-        app->pieces[WHITE][8].x = 1;
-        app->pieces[WHITE][8].y = 7;
-        app->pieces[WHITE][8].is_dead = 0;
-        app->pieces[WHITE][9].x = 6;
-        app->pieces[WHITE][9].y = 7;
-        app->pieces[WHITE][9].is_dead = 0;
-        app->pieces[BLACK][8].x = 1;
-        app->pieces[BLACK][8].y = 0;
-        app->pieces[BLACK][8].is_dead = 0;
-        app->pieces[BLACK][9].x = 6;
-        app->pieces[BLACK][9].y = 0;
-        app->pieces[BLACK][9].is_dead = 0;
+        INIT_PIECE(WHITE, 8, 1, 7);
+
+        INIT_PIECE(WHITE, 9, 6, 7);
+
+        INIT_PIECE(BLACK, 8, 1, 0);            
+        
+        INIT_PIECE(BLACK, 9, 6, 0);
     }
     else
     {
-        app->pieces[WHITE][8].x = 1;
-        app->pieces[WHITE][8].y = 0;
-        app->pieces[WHITE][8].is_dead = 0;
-        app->pieces[WHITE][9].x = 6;
-        app->pieces[WHITE][9].y = 0;
-        app->pieces[WHITE][9].is_dead = 0;
-        app->pieces[BLACK][8].x = 1;
-        app->pieces[BLACK][8].y = 7;
-        app->pieces[BLACK][8].is_dead = 0;
-        app->pieces[BLACK][9].x = 6;
-        app->pieces[BLACK][9].y = 7;
-        app->pieces[BLACK][9].is_dead = 0;
+        INIT_PIECE(WHITE, 8, 1, 0);
+
+        INIT_PIECE(WHITE, 9, 6, 0);
+
+        INIT_PIECE(BLACK, 8, 1, 7);            
+        
+        INIT_PIECE(BLACK, 9, 6, 7);
     }
 
     // Set bishops
     if (app->pov == WHITE_POV)
     {
-        app->pieces[WHITE][10].x = 2;
-        app->pieces[WHITE][10].y = 7;
-        app->pieces[WHITE][10].is_dead = 0;
-        app->pieces[WHITE][11].x = 5;
-        app->pieces[WHITE][11].y = 7;
-        app->pieces[WHITE][11].is_dead = 0;
-        app->pieces[BLACK][10].x = 2;
-        app->pieces[BLACK][10].y = 0;
-        app->pieces[BLACK][10].is_dead = 0;
-        app->pieces[BLACK][11].x = 5;
-        app->pieces[BLACK][11].y = 0;
-        app->pieces[BLACK][11].is_dead = 0;
+        INIT_PIECE(WHITE, 10, 2, 7);
+
+        INIT_PIECE(WHITE, 11, 5, 7);
+
+        INIT_PIECE(BLACK, 10, 2, 0);            
+        
+        INIT_PIECE(BLACK, 11, 5, 0);
     }
     else
     {
-        app->pieces[WHITE][10].x = 2;
-        app->pieces[WHITE][10].y = 0;
-        app->pieces[WHITE][10].is_dead = 0;
-        app->pieces[WHITE][11].x = 5;
-        app->pieces[WHITE][11].y = 0;
-        app->pieces[WHITE][11].is_dead = 0;
-        app->pieces[BLACK][10].x = 2;
-        app->pieces[BLACK][10].y = 7;
-        app->pieces[BLACK][10].is_dead = 0;
-        app->pieces[BLACK][11].x = 5;
-        app->pieces[BLACK][11].y = 7;
-        app->pieces[BLACK][11].is_dead = 0;
+        INIT_PIECE(WHITE, 10, 2, 0);
+
+        INIT_PIECE(WHITE, 11, 5, 0);
+
+        INIT_PIECE(BLACK, 10, 2, 7);            
+        
+        INIT_PIECE(BLACK, 11, 5, 7);
     }
 
     // Set rooks
     if (app->pov == WHITE_POV)
     {
-        app->pieces[WHITE][12].x = 0;
-        app->pieces[WHITE][12].y = 7;
-        app->pieces[WHITE][12].is_dead = 0;
-        app->pieces[WHITE][13].x = 7;
-        app->pieces[WHITE][13].y = 7;
-        app->pieces[WHITE][13].is_dead = 0;
-        app->pieces[BLACK][12].x = 0;
-        app->pieces[BLACK][12].y = 0;
-        app->pieces[BLACK][12].is_dead = 0;
-        app->pieces[BLACK][13].x = 7;
-        app->pieces[BLACK][13].y = 0;
-        app->pieces[BLACK][13].is_dead = 0;
+        INIT_PIECE(WHITE, 12, 0, 7);
+
+        INIT_PIECE(WHITE, 13, 7, 7);
+
+        INIT_PIECE(BLACK, 12, 0, 0);            
+        
+        INIT_PIECE(BLACK, 13, 7, 0);
     }
     else
     {
-        app->pieces[WHITE][12].x = 0;
-        app->pieces[WHITE][12].y = 0;
-        app->pieces[WHITE][12].is_dead = 0;
-        app->pieces[WHITE][13].x = 7;
-        app->pieces[WHITE][13].y = 0;
-        app->pieces[WHITE][13].is_dead = 0;
-        app->pieces[BLACK][12].x = 0;
-        app->pieces[BLACK][12].y = 7;
-        app->pieces[BLACK][12].is_dead = 0;
-        app->pieces[BLACK][13].x = 7;
-        app->pieces[BLACK][13].y = 7;
-        app->pieces[BLACK][13].is_dead = 0;
+        INIT_PIECE(WHITE, 12, 0, 0);
+
+        INIT_PIECE(WHITE, 13, 7, 0);
+
+        INIT_PIECE(BLACK, 12, 0, 7);            
+        
+        INIT_PIECE(BLACK, 13, 7, 7);
     }
 
     // Set queens
     if (app->pov == WHITE_POV)
     {
-        app->pieces[WHITE][14].x = 3;
-        app->pieces[WHITE][14].y = 7;
-        app->pieces[WHITE][14].is_dead = 0;
-        app->pieces[BLACK][14].x = 3;
-        app->pieces[BLACK][14].y = 0;
-        app->pieces[BLACK][14].is_dead = 0;
+        INIT_PIECE(WHITE, 14, 3, 7);
+
+        INIT_PIECE(BLACK, 14, 3, 0);
     }
     else
     {
-        app->pieces[WHITE][14].x = 3;
-        app->pieces[WHITE][14].y = 0;
-        app->pieces[WHITE][14].is_dead = 0;
-        app->pieces[BLACK][14].x = 3;
-        app->pieces[BLACK][14].y = 7;
-        app->pieces[BLACK][14].is_dead = 0;
+        INIT_PIECE(WHITE, 14, 3, 0);
+
+        INIT_PIECE(BLACK, 14, 3, 7);
     }
 
     // Set kings
     if (app->pov == WHITE_POV)
     {
-        app->pieces[WHITE][15].x = 4;
-        app->pieces[WHITE][15].y = 7;
-        app->pieces[WHITE][15].is_dead = 0;
-        app->pieces[BLACK][15].x = 4;
-        app->pieces[BLACK][15].y = 0;
-        app->pieces[BLACK][15].is_dead = 0;
+        INIT_PIECE(WHITE, 15, 4, 7);
+
+        INIT_PIECE(BLACK, 15, 4, 0);
     }
     else
     {
-        app->pieces[WHITE][15].x = 4;
-        app->pieces[WHITE][15].y = 0;
-        app->pieces[WHITE][15].is_dead = 0;
-        app->pieces[BLACK][15].x = 4;
-        app->pieces[BLACK][15].y = 7;
-        app->pieces[BLACK][15].is_dead = 0;
+        INIT_PIECE(WHITE, 15, 4, 0);
+
+        INIT_PIECE(BLACK, 15, 4, 7);
     }
 }
 
@@ -398,6 +432,11 @@ app_t* init_game(app_t* app)
     if (SDL_Init(SDL_INIT_VIDEO))
     {
         fprintf(stderr, "Failed to init SDL: %s\n", SDL_GetError());
+        return NULL;
+    }
+    if (IMG_Init(IMG_INIT_PNG) != IMG_INIT_PNG)
+    {
+        fprintf(stderr, "Failed to init SDL_image: %s\n", IMG_GetError());
         return NULL;
     }
     app->resources.window = SDL_CreateWindow("SDL2 Window",
@@ -429,10 +468,10 @@ app_t* init_game(app_t* app)
     }
     SDL_RenderPresent(app->resources.renderer);
     app->freed = 0;
-    if (SDL_CaptureMouse(SDL_TRUE))
+    /* if (SDL_CaptureMouse(SDL_TRUE))
     {
         fprintf(stderr, "Failed to capture mouse: %s\n", SDL_GetError());
-    }
+    } */
     SDL_GetMouseState(&app->mouse.x, &app->mouse.y);
     SDL_GetWindowSize(app->resources.window, &app->screen.w, &app->screen.h);
     app->board.x = 0.0;
@@ -492,7 +531,6 @@ app_t* init_game(app_t* app)
 
     app->states.turn = WHITE;
     app->states.app_state = MENU;
-    app->states.selected_piece = NONE_SELECTED;
     app->states.game_state = GAME_NOT_STARTED;
 
     set_pieces_init_pos(app);
@@ -576,6 +614,7 @@ void quit_game(app_t* app)
     }
     TTF_CloseFont(app->font.ptr);
     TTF_Quit();
+    IMG_Quit();
     SDL_Quit();
     app->freed = 1;
 }
@@ -597,23 +636,23 @@ SDL_Rect* screen_dim(app_t* app, SDL_Rect* rect)
     return rect;
 }
 
-int draw_pieces(app_t* app, double min_dim, double max_dim, double x_offset, double y_offset)
+/* int draw_pieces(app_t* app, double min_dim, double max_dim, double x_offset, double y_offset)
 {
     if (app->freed)
     {
         return -1;
     }
-    SDL_Rect rect = {0};
-    rect.w = (int) ((min_dim - (min_dim / 8)) / 8);
-    rect.h = (int) ((min_dim - (min_dim / 8)) / 8);
     for (size_t i = 0; i < 16; ++i)
     {
         if (app->pieces[WHITE][i].is_dead)
         {
             continue;
         }
-        rect.x = (int) (x_offset + (app->pieces[WHITE][i].x * rect.w));
-        rect.y = (int) (y_offset + (app->pieces[WHITE][i].y * rect.h));
+        SDL_Rect rect = {0};
+        rect.w = (int) (((min_dim - (min_dim / 8)) / 8) * 0.8);
+        rect.h = (int) (((min_dim - (min_dim / 8)) / 8) * 0.8);
+        rect.x = (int) (x_offset + (app->pieces[WHITE][i].x * (double) rect.w)) + ((double) rect.w * 0.1);
+        rect.y = (int) (y_offset + (app->pieces[WHITE][i].y * (double) rect.h)) + ((double) rect.h * 0.1);
         if (i <= 7)
         {
             SDL_Texture* texture = SDL_CreateTextureFromSurface(app->resources.renderer, app->white_pieces_surfaces[PAWN].surface);
@@ -705,14 +744,18 @@ int draw_pieces(app_t* app, double min_dim, double max_dim, double x_offset, dou
             }
         }
     }
+    #if 0
     for (size_t i = 0; i < 16; ++i)
     {
         if (app->pieces[BLACK][i].is_dead)
         {
             continue;
         }
-        rect.x = (int) (x_offset + (app->pieces[BLACK][i].x * rect.w));
-        rect.y = (int) (y_offset + (app->pieces[BLACK][i].y * rect.h));
+        SDL_Rect rect = {0};
+        rect.w = (int) (((min_dim - (min_dim / 8)) / 8) * 0.8);
+        rect.h = (int) (((min_dim - (min_dim / 8)) / 8) * 0.8);
+        rect.x = (int) (x_offset + (app->pieces[BLACK][i].x * (double) rect.w)) + ((double) rect.w * 0.1);
+        rect.y = (int) (y_offset + (app->pieces[BLACK][i].y * (double) rect.h)) + ((double) rect.h * 0.1);
         if (i <= 7)
         {
             SDL_Texture* texture = SDL_CreateTextureFromSurface(app->resources.renderer, app->black_pieces_surfaces[PAWN].surface);
@@ -804,8 +847,9 @@ int draw_pieces(app_t* app, double min_dim, double max_dim, double x_offset, dou
             }
         }
     }
+    #endif
     return 0;
-}
+} */
 
 int draw_chess_board(app_t* app)
 {
@@ -906,10 +950,10 @@ int draw_chess_board(app_t* app)
         }
     }
 
-    if (draw_pieces(app, min_dim, max_dim, x_offset, y_offset))
+    /* if (draw_pieces(app, min_dim, max_dim, x_offset, y_offset))
     {
         return -1;
-    }
+    } */
 
     // Test: try to render a queen
     /* SDL_Rect queen_rect = {0};
@@ -930,6 +974,174 @@ int draw_chess_board(app_t* app)
     }
     SDL_DestroyTexture(queen_texture); */
 
+    // Draw the pieces
+    for (size_t i = 0; i < 16; ++i)
+    {
+        if (app->pieces[WHITE][i].is_dead)
+        {
+            continue;
+        }
+        SDL_Rect piece_rect = {0};
+        piece_rect.w = (int) ((double) rect.w * 0.7);
+        piece_rect.h = (int) ((double) rect.h * 0.7);
+        if (!app->pieces[WHITE][i].is_selected)
+        {
+            piece_rect.x = (int) (x_offset + (app->pieces[WHITE][i].normal_pos.x * (double) rect.w)) + ((double) rect.w * 0.15);
+            piece_rect.y = (int) (y_offset + (app->pieces[WHITE][i].normal_pos.y * (double) rect.h)) + ((double) rect.h * 0.15);
+        }
+        else
+        {
+            piece_rect.x = (int) (x_offset + (app->pieces[WHITE][i].selected_pos.x * (double) rect.w)) + ((double) rect.w * 0.15);
+            piece_rect.y = (int) (y_offset + (app->pieces[WHITE][i].selected_pos.y * (double) rect.h)) + ((double) rect.h * 0.15);
+        }
+        SDL_Texture* piece_texture = NULL;
+        if (i <= 7)
+        {
+            piece_texture = SDL_CreateTextureFromSurface(app->resources.renderer, app->white_pieces_surfaces[PAWN].surface);
+            if (!piece_texture)
+            {
+                fprintf(stderr, "Failed to create texture from surface: %s\n", SDL_GetError());
+                return -1;
+            }
+        }
+        else if (i <= 9)
+        {
+            piece_texture = SDL_CreateTextureFromSurface(app->resources.renderer, app->white_pieces_surfaces[KNIGHT].surface);
+            if (!piece_texture)
+            {
+                fprintf(stderr, "Failed to create texture from surface: %s\n", SDL_GetError());
+                return -1;
+            }
+        }
+        else if (i <= 11)
+        {
+            piece_texture = SDL_CreateTextureFromSurface(app->resources.renderer, app->white_pieces_surfaces[BISHOP].surface);
+            if (!piece_texture)
+            {
+                fprintf(stderr, "Failed to create texture from surface: %s\n", SDL_GetError());
+                return -1;
+            }
+        }
+        else if (i <= 13)
+        {
+            piece_texture = SDL_CreateTextureFromSurface(app->resources.renderer, app->white_pieces_surfaces[ROOK].surface);
+            if (!piece_texture)
+            {
+                fprintf(stderr, "Failed to create texture from surface: %s\n", SDL_GetError());
+                return -1;
+            }
+        }
+        else if (i <= 14)
+        {
+            piece_texture = SDL_CreateTextureFromSurface(app->resources.renderer, app->white_pieces_surfaces[QUEEN].surface);
+            if (!piece_texture)
+            {
+                fprintf(stderr, "Failed to create texture from surface: %s\n", SDL_GetError());
+                return -1;
+            }
+        }
+        else
+        {
+            piece_texture = SDL_CreateTextureFromSurface(app->resources.renderer, app->white_pieces_surfaces[KING].surface);
+            if (!piece_texture)
+            {
+                fprintf(stderr, "Failed to create texture from surface: %s\n", SDL_GetError());
+                return -1;
+            }
+        }
+        if (SDL_RenderCopy(app->resources.renderer, piece_texture, NULL, &piece_rect))
+        {
+            fprintf(stderr, "Failed to render copy: %s\n", SDL_GetError());
+            SDL_DestroyTexture(piece_texture);
+            return -1;
+        }
+        SDL_DestroyTexture(piece_texture);
+        app->pieces[WHITE][i].rect = piece_rect;
+    }
+    for (size_t i = 0; i < 16; ++i)
+    {
+        if (app->pieces[BLACK][i].is_dead)
+        {
+            continue;
+        }
+        SDL_Rect piece_rect = {0};
+        piece_rect.w = (int) ((double) rect.w * 0.7);
+        piece_rect.h = (int) ((double) rect.h * 0.7);
+        if (!app->pieces[BLACK][i].is_selected)
+        {
+            piece_rect.x = (int) (x_offset + (app->pieces[BLACK][i].normal_pos.x * (double) rect.w)) + ((double) rect.w * 0.15);
+            piece_rect.y = (int) (y_offset + (app->pieces[BLACK][i].normal_pos.y * (double) rect.h)) + ((double) rect.h * 0.15);
+        }
+        else
+        {
+            piece_rect.x = (int) (x_offset + (app->pieces[BLACK][i].selected_pos.x * (double) rect.w)) + ((double) rect.w * 0.15);
+            piece_rect.y = (int) (y_offset + (app->pieces[BLACK][i].selected_pos.y * (double) rect.h)) + ((double) rect.h * 0.15);
+        }
+        SDL_Texture* piece_texture = NULL;
+        if (i <= 7)
+        {
+            piece_texture = SDL_CreateTextureFromSurface(app->resources.renderer, app->black_pieces_surfaces[PAWN].surface);
+            if (!piece_texture)
+            {
+                fprintf(stderr, "Failed to create texture from surface: %s\n", SDL_GetError());
+                return -1;
+            }
+        }
+        else if (i <= 9)
+        {
+            piece_texture = SDL_CreateTextureFromSurface(app->resources.renderer, app->black_pieces_surfaces[KNIGHT].surface);
+            if (!piece_texture)
+            {
+                fprintf(stderr, "Failed to create texture from surface: %s\n", SDL_GetError());
+                return -1;
+            }
+        }
+        else if (i <= 11)
+        {
+            piece_texture = SDL_CreateTextureFromSurface(app->resources.renderer, app->black_pieces_surfaces[BISHOP].surface);
+            if (!piece_texture)
+            {
+                fprintf(stderr, "Failed to create texture from surface: %s\n", SDL_GetError());
+                return -1;
+            }
+        }
+        else if (i <= 13)
+        {
+            piece_texture = SDL_CreateTextureFromSurface(app->resources.renderer, app->black_pieces_surfaces[ROOK].surface);
+            if (!piece_texture)
+            {
+                fprintf(stderr, "Failed to create texture from surface: %s\n", SDL_GetError());
+                return -1;
+            }
+        }
+        else if (i <= 14)
+        {
+            piece_texture = SDL_CreateTextureFromSurface(app->resources.renderer, app->black_pieces_surfaces[QUEEN].surface);
+            if (!piece_texture)
+            {
+                fprintf(stderr, "Failed to create texture from surface: %s\n", SDL_GetError());
+                return -1;
+            }
+        }
+        else
+        {
+            piece_texture = SDL_CreateTextureFromSurface(app->resources.renderer, app->black_pieces_surfaces[KING].surface);
+            if (!piece_texture)
+            {
+                fprintf(stderr, "Failed to create texture from surface: %s\n", SDL_GetError());
+                return -1;
+            }
+        }
+        if (SDL_RenderCopy(app->resources.renderer, piece_texture, NULL, &piece_rect))
+        {
+            fprintf(stderr, "Failed to render copy: %s\n", SDL_GetError());
+            SDL_DestroyTexture(piece_texture);
+            return -1;
+        }
+        SDL_DestroyTexture(piece_texture);
+        app->pieces[BLACK][i].rect = piece_rect;
+    }
+
     return 0;
 }
 
@@ -942,6 +1154,7 @@ int main(int argc, char *argv[])
     }
     while (1)
     {
+        Uint64 frame_start = SDL_GetTicks64();
         SDL_Event event;
         if (SDL_PollEvent(&event))
         {
@@ -958,7 +1171,16 @@ int main(int argc, char *argv[])
         }
         else
         {
-            SDL_Delay((Uint32) (1000.0 / 140.0));
+            Uint64 frame_end = SDL_GetTicks64();
+            double elapsed_ms = (double) (frame_end - frame_start);
+            if (elapsed_ms < EXPECTED_FRAME_TIME)
+            {
+                #if defined(_WIN32)
+                Sleep((DWORD) (EXPECTED_FRAME_TIME - elapsed_ms));
+                #elif defined(__linux__)
+                usleep((useconds_t) ((EXPECTED_FRAME_TIME - elapsed_ms) * 1000));
+                #endif
+            }
         }
     }
     
