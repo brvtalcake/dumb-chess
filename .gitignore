@@ -53,3 +53,11 @@ dkms.conf
 
 
 .vscode/**
+test.c
+test_.c
+test
+test_
+test__.c
+test__.ver
+main__
+main__.c
